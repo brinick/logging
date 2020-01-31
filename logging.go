@@ -14,10 +14,12 @@ type Logger interface {
 	LogLeveler
 }
 
+// Configurer defines the interface to configure logging clients
 type Configurer interface {
 	Configure(*Config)
 }
 
+// LogLeveler defines the interface for log level methods
 type LogLeveler interface {
 	Debug(string, ...Field)
 	Info(string, ...Field)
@@ -25,13 +27,14 @@ type LogLeveler interface {
 	Fatal(string, ...Field)
 }
 
+// Config is the concrete type that is passed to a Configurer
 type Config struct {
-	LogLevel  string
-	OutFormat string
-	Outfile   string
+	LogLevel  string // Debug | Info | Error
+	OutFormat string // json | text
+	Outfile   string // path to file. Missing = send to stdout/err
 }
 
-// Shortcut function for creating logging Fields
+// F is a shortcut for creating logging Fields
 func F(name string, val interface{}) Field {
 	return Field{
 		Name: name,
@@ -39,13 +42,35 @@ func F(name string, val interface{}) Field {
 	}
 }
 
+// Field represents a logging Field
 type Field struct {
 	Name string
 	Val  interface{}
 }
 
-// logger is the logging package log client set via the SetClient function
-var logger Logger = NewNullLogger()
+var (
+	// logger is the logging package log client set via the SetClient function
+	logger Logger = NewNullLogger()
+
+	// ErrField is a shortcut function for adding an error field to the log output
+	ErrField = func(e error) Field {
+		return F("err", e)
+	}
+)
+
+// NewClient returns a new instance of the concrete
+// logging Client with the given name
+func NewClient(name string) Logger {
+	var logger Logger
+	switch name {
+	case "logrus":
+		logger = NewLogrusLogger()
+	default:
+		logger = NewNullLogger()
+	}
+
+	return logger
+}
 
 // SetClient is a factory function to initiate the logging client
 // with the given name. The instance is then set at the package level,
@@ -81,18 +106,22 @@ func Configure(level, format, outfile string) {
 // Short cuts to the logging client
 // ------------------------------------------------------------------
 
+// Debug calls the logger Debug method
 func Debug(msg string, fields ...Field) {
 	logger.Debug(msg, fields...)
 }
 
+// Info calls the logger Info method
 func Info(msg string, fields ...Field) {
 	logger.Info(msg, fields...)
 }
 
+// Error calls the logger Error method
 func Error(msg string, fields ...Field) {
 	logger.Error(msg, fields...)
 }
 
+// Fatal calls the logger Fatal method
 func Fatal(msg string, fields ...Field) {
 	logger.Fatal(msg, fields...)
 }

@@ -1,50 +1,78 @@
 package logging
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"os"
+	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // ------------------------------------------------------------------
 
-// LogrusLogger wraps a logrus client
+// NewLogrusLogger wraps a logrus client
 func NewLogrusLogger() Logger {
-	return &LogrusLogger{
+	l := &LogrusLogger{
 		log: logrus.New(),
 	}
+	l.Configure(&Config{
+		OutFormat: "text",
+	})
+
+	return l
 }
 
 // ------------------------------------------------------------------
 
+// LogrusLogger defines a logger using the logrus package as its backend
 type LogrusLogger struct {
 	log *logrus.Logger
 }
 
+// Name returns the name of the logg
 func (l *LogrusLogger) Name() string {
 	return "logrus"
 }
 
+// Configure permits configuration of the logger via a Config struct
 func (l *LogrusLogger) Configure(cfg *Config) {
 	l.log.Out = os.Stdout
+	if cfg.Outfile != "" {
+		file, err := os.OpenFile(cfg.Outfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0774)
+		if err != nil {
+			l.Error(
+				"Failed to open file for logging, log to stdout/err instead",
+				F("err", err),
+				F("file", cfg.Outfile),
+			)
+		}
+
+		l.log.Out = file
+	}
+
 	l.log.Level = l.toLogLevel(cfg.LogLevel)
 	l.log.Formatter = l.toOutputFormat(cfg.OutFormat)
 }
 
+// Debug defines the debug level for this logger
 func (l *LogrusLogger) Debug(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Debug(msg)
 }
 
+// Info defines the info level for this logger
 func (l *LogrusLogger) Info(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Info(msg)
 }
 
+// Error defines the error level for this logger
 func (l *LogrusLogger) Error(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Error(msg)
 }
 
+// Fatal defines the fatal level for this logger
 func (l *LogrusLogger) Fatal(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Fatal(msg)
@@ -69,6 +97,8 @@ func (l *LogrusLogger) toOutputFormat(name string) logrus.Formatter {
 }
 
 func (l *LogrusLogger) toLogLevel(name string) logrus.Level {
+	name = strings.TrimSpace(name)
+
 	switch name {
 	case "debug":
 		return logrus.DebugLevel
@@ -77,7 +107,15 @@ func (l *LogrusLogger) toLogLevel(name string) logrus.Level {
 	case "error":
 		return logrus.ErrorLevel
 	default:
-		panic("Unknown log level " + name + ". Legal: debug | info | error")
+		var msg = fmt.Sprintf(
+			"Unknown log level: %s. Legal values: debug, info, error",
+			name,
+		)
+
+		if len(name) == 0 {
+			msg = "Please provide a log level. Legal values: debug, info, error"
+		}
+		panic(msg)
 	}
 }
 
