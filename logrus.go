@@ -10,15 +10,23 @@ import (
 
 // ------------------------------------------------------------------
 
+func defaultLogrusConfig() *Config {
+	return &Config{
+		OutFormat: "text",
+		LogLevel:  "info",
+	}
+}
+
 // NewLogrusLogger wraps a logrus client
-func NewLogrusLogger() Logger {
+func NewLogrusLogger(cfg *Config) Logger {
 	l := &LogrusLogger{
 		log: logrus.New(),
 	}
-	l.Configure(&Config{
-		OutFormat: "text",
-	})
+	if cfg == nil {
+		cfg = defaultLogrusConfig()
+	}
 
+	l.Configure(cfg)
 	return l
 }
 
