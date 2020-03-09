@@ -10,9 +10,14 @@ func NewNullLogger(cfg *Config) *NullLogger {
 // NullLogger does nothing
 type NullLogger struct{}
 
-// Name returns the name of the logg
+// Name returns the name of the logger
 func (NullLogger) Name() string {
 	return "null"
+}
+
+// Path returns the path to the logger output file
+func (NullLogger) Path() string {
+	return ""
 }
 
 // Configure permits configuration of the logger via a Config struct

@@ -34,7 +34,8 @@ func NewLogrusLogger(cfg *Config) Logger {
 
 // LogrusLogger defines a logger using the logrus package as its backend
 type LogrusLogger struct {
-	log *logrus.Logger
+	log  *logrus.Logger
+	path string
 }
 
 // Name returns the name of the logg
@@ -42,17 +43,28 @@ func (l *LogrusLogger) Name() string {
 	return "logrus"
 }
 
+// Path returns the full path to the logger output, or empty string if
+// logging is not going to a file
+func (l *LogrusLogger) Path() string {
+	return l.path
+}
+
 // Configure permits configuration of the logger via a Config struct
 func (l *LogrusLogger) Configure(cfg *Config) {
 	l.log.Out = os.Stdout
+
+	l.path = cfg.Outfile
 	if cfg.Outfile != "" {
-		file, err := os.OpenFile(cfg.Outfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0774)
+		file, err := os.OpenFile(cfg.Outfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 		if err != nil {
 			l.Error(
 				"Failed to open file for logging, log to stdout/err instead",
 				F("err", err),
 				F("file", cfg.Outfile),
 			)
+
+			l.path = ""
+			file = os.Stdout
 		}
 
 		l.log.Out = file

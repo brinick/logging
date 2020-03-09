@@ -10,6 +10,7 @@ import (
 // Logger defines the interface for logging clients
 type Logger interface {
 	Name() string
+	Path() string
 	Configurer
 	LogLeveler
 }
