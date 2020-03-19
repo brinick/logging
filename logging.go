@@ -35,6 +35,25 @@ type Config struct {
 	Outfile   string // path to file. Missing = send to stdout/err
 }
 
+// Update will overwrite this Config's fields with the provided one
+// if the new fields are not the zero value for that field.
+func (c *Config) Update(cfg *Config) *Config {
+	if cfg != nil {
+		if cfg.LogLevel != "" {
+			c.LogLevel = cfg.LogLevel
+		}
+
+		if cfg.OutFormat != "" {
+			c.OutFormat = cfg.OutFormat
+		}
+
+		if cfg.Outfile != "" {
+			c.Outfile = cfg.Outfile
+		}
+	}
+	return c
+}
+
 // F is a shortcut for creating logging Fields
 func F(name string, val interface{}) Field {
 	return Field{

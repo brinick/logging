@@ -26,7 +26,7 @@ func NewLogrusLogger(cfg *Config) Logger {
 		cfg = defaultLogrusConfig()
 	}
 
-	l.Configure(cfg)
+	l.Configure(defaultLogrusConfig().Update(cfg))
 	return l
 }
 
