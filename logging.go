@@ -17,7 +17,7 @@ type Logger interface {
 
 // Configurer defines the interface to configure logging clients
 type Configurer interface {
-	Configure(*Config)
+	Configure(*Config) error
 }
 
 // LogLeveler defines the interface for log level methods

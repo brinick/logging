@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/brinick/fs"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,28 +51,56 @@ func (l *LogrusLogger) Path() string {
 }
 
 // Configure permits configuration of the logger via a Config struct
-func (l *LogrusLogger) Configure(cfg *Config) {
+func (l *LogrusLogger) Configure(cfg *Config) error {
 	l.log.Out = os.Stdout
+	l.log.Level = l.toLogLevel(cfg.LogLevel)
+	l.log.Formatter = l.toOutputFormat(cfg.OutFormat)
 
-	l.path = cfg.Outfile
-	if cfg.Outfile != "" {
+	l.path = strings.TrimSpace(cfg.Outfile)
+	if l.path != "" {
+		if err := l.logfileCheck(); err != nil {
+			return err
+		}
+
 		file, err := os.OpenFile(cfg.Outfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664)
 		if err != nil {
-			l.Error(
-				"Failed to open file for logging, log to stdout/err instead",
-				F("err", err),
-				F("file", cfg.Outfile),
-			)
-
-			l.path = ""
-			file = os.Stdout
+			return err
 		}
+
+		/*
+				l.Error(
+					"Failed to open file for logging, using stdout/err instead",
+					F("err", err),
+					F("file", cfg.Outfile),
+				)
+
+			}
+		*/
 
 		l.log.Out = file
 	}
 
-	l.log.Level = l.toLogLevel(cfg.LogLevel)
-	l.log.Formatter = l.toOutputFormat(cfg.OutFormat)
+	return nil
+}
+
+// logfileCheck verifies, if logging to a file is requested, that the
+// file parent directory exists
+func (l *LogrusLogger) logfileCheck() error {
+	logfile := fs.File(l.path)
+	logfileDir := logfile.Dir()
+	exists, err := logfileDir.Exists()
+	if err != nil {
+		return fmt.Errorf("unable to check if logfile")
+	}
+
+	if !exists {
+		return fmt.Errorf(
+			"log file parent directory inexistant, please create (%s)",
+			logfileDir.Path,
+		)
+	}
+
+	return nil
 }
 
 // Debug defines the debug level for this logger

@@ -21,7 +21,7 @@ func (NullLogger) Path() string {
 }
 
 // Configure permits configuration of the logger via a Config struct
-func (NullLogger) Configure(*Config) {}
+func (NullLogger) Configure(*Config) error { return nil }
 
 // Debug defines the debug level for this logger
 func (NullLogger) Debug(string, ...Field) {}
