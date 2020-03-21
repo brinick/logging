@@ -1,10 +1,10 @@
 package logging
 
 //NewNullLogger creates a new NullLogger
-func NewNullLogger(cfg *Config) *NullLogger {
+func NewNullLogger(cfg *Config) (*NullLogger, error) {
 	l := &NullLogger{}
 	l.Configure(cfg)
-	return l
+	return l, nil
 }
 
 // NullLogger does nothing

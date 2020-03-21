@@ -19,7 +19,7 @@ func defaultLogrusConfig() *Config {
 }
 
 // NewLogrusLogger wraps a logrus client
-func NewLogrusLogger(cfg *Config) Logger {
+func NewLogrusLogger(cfg *Config) (*LogrusLogger, error) {
 	l := &LogrusLogger{
 		log: logrus.New(),
 	}
@@ -27,8 +27,11 @@ func NewLogrusLogger(cfg *Config) Logger {
 		cfg = defaultLogrusConfig()
 	}
 
-	l.Configure(defaultLogrusConfig().Update(cfg))
-	return l
+	if err := l.Configure(defaultLogrusConfig().Update(cfg)); err != nil {
+		return nil, err
+	}
+
+	return l, nil
 }
 
 // ------------------------------------------------------------------

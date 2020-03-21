@@ -70,7 +70,7 @@ type Field struct {
 
 var (
 	// logger is the logging package log client set via the SetClient function
-	logger Logger = NewNullLogger(nil)
+	logger Logger
 
 	// ErrField is a shortcut function for adding an error field to the log output
 	ErrField = func(e error) Field {
@@ -80,31 +80,49 @@ var (
 
 // NewClient returns a new instance of the concrete
 // logging Client with the given name
-func NewClient(name string, cfg *Config) Logger {
-	var logger Logger
+func NewClient(name string, cfg *Config) (Logger, error) {
+	var (
+		logger Logger
+		err    error
+	)
+
 	switch name {
 	case "logrus":
-		logger = NewLogrusLogger(cfg)
+		logger, err = NewLogrusLogger(cfg)
 	default:
-		logger = NewNullLogger(cfg)
+		logger, err = NewNullLogger(cfg)
 	}
 
-	return logger
+	return logger, err
 }
 
 // SetClient is a factory function to initiate the logging client
 // with the given name. The instance is then set at the package level,
 // and is retrievable in other packages using the Client() function.
-func SetClient(name string, cfg *Config) {
+func SetClient(name string, cfg *Config) error {
 	if logger != nil && logger.Name() == name {
-		return
+		return nil
 	}
+
+	var (
+		lggr Logger
+		err  error
+	)
+
 	switch name {
 	case "logrus":
-		logger = NewLogrusLogger(cfg)
+		lggr, err = NewLogrusLogger(cfg)
 	default:
-		logger = NewNullLogger(cfg)
+		lggr, err = NewNullLogger(cfg)
 	}
+
+	if err != nil {
+		return err
+	}
+
+	// Go ahead and set the package-level logger
+	logger = lggr
+	return nil
 }
 
 // Client returns the logging client, or nil if it has not
