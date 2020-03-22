@@ -70,16 +70,6 @@ func (l *LogrusLogger) Configure(cfg *Config) error {
 			return err
 		}
 
-		/*
-				l.Error(
-					"Failed to open file for logging, using stdout/err instead",
-					F("err", err),
-					F("file", cfg.Outfile),
-				)
-
-			}
-		*/
-
 		l.log.Out = file
 	}
 

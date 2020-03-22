@@ -93,7 +93,10 @@ func NewClient(name string, cfg *Config) (Logger, error) {
 		logger, err = NewNullLogger(cfg)
 	}
 
-	return logger, err
+	if err != nil {
+		return nil, err
+	}
+	return logger, nil
 }
 
 // SetClient is a factory function to initiate the logging client
