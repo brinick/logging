@@ -115,8 +115,16 @@ func SetClient(name string, cfg *Config) error {
 	switch name {
 	case "logrus":
 		lggr, err = NewLogrusLogger(cfg)
-	default:
+	case "none":
 		lggr, err = NewNullLogger(cfg)
+	default:
+		panic(
+			fmt.Sprintf(
+				"unknown logging client type %s. Legal: %s",
+				name,
+				strings.Join([]string{"logrus", "none"}, ", "),
+			),
+		)
 	}
 
 	if err != nil {
