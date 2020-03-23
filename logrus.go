@@ -83,13 +83,20 @@ func (l *LogrusLogger) logfileCheck() error {
 	logfileDir := logfile.Dir()
 	exists, err := logfileDir.Exists()
 	if err != nil {
-		return fmt.Errorf("unable to check if logfile")
+		return fmt.Errorf(
+			fmt.Sprintf(
+				"unable to check if logfile parent directory exists: %v\n",
+				err,
+			),
+		)
 	}
 
 	if !exists {
 		return fmt.Errorf(
-			"log file parent directory inexistant, please create (%s)",
-			logfileDir.Path,
+			fmt.Sprintf(
+				"log file parent directory inexistant, please create (%s)\n",
+				logfileDir.Path,
+			),
 		)
 	}
 
