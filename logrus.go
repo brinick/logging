@@ -79,7 +79,7 @@ func (l *LogrusLogger) Configure(cfg *Config) error {
 // logfileCheck verifies, if logging to a file is requested, that the
 // file parent directory exists
 func (l *LogrusLogger) logfileCheck() error {
-	logfile := fs.File(l.path)
+	logfile := fs.NewFile(l.path)
 	logfileDir := logfile.Dir()
 	exists, err := logfileDir.Exists()
 	if err != nil {
