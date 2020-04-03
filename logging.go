@@ -23,9 +23,13 @@ type Configurer interface {
 // LogLeveler defines the interface for log level methods
 type LogLeveler interface {
 	Debug(string, ...Field)
+	DebugL([]string, ...Field)
 	Info(string, ...Field)
+	InfoL([]string, ...Field)
 	Error(string, ...Field)
+	ErrorL([]string, ...Field)
 	Fatal(string, ...Field)
+	FatalL([]string, ...Field)
 }
 
 // Config is the concrete type that is passed to a Configurer

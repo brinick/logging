@@ -105,10 +105,26 @@ func (l *LogrusLogger) Debug(msg string, fields ...Field) {
 	l.log.WithFields(mapify(fields...)).Debug(msg)
 }
 
+// DebugL defines the debug level for more than one log line
+func (l *LogrusLogger) DebugL(msgs []string, fields ...Field) {
+	fieldsMap := mapify(fields...)
+	for _, line := range msgs {
+		l.log.WithFields(fieldsMap).Debug(line)
+	}
+}
+
 // Info defines the info level for this logger
 func (l *LogrusLogger) Info(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Info(msg)
+}
+
+// InfoL defines the info level for more than one log line
+func (l *LogrusLogger) InfoL(msgs []string, fields ...Field) {
+	fieldsMap := mapify(fields...)
+	for _, line := range msgs {
+		l.log.WithFields(fieldsMap).Info(line)
+	}
 }
 
 // Error defines the error level for this logger
@@ -117,10 +133,26 @@ func (l *LogrusLogger) Error(msg string, fields ...Field) {
 	l.log.WithFields(mapify(fields...)).Error(msg)
 }
 
+// ErrorL defines the error level for more than one log line
+func (l *LogrusLogger) ErrorL(msgs []string, fields ...Field) {
+	fieldsMap := mapify(fields...)
+	for _, line := range msgs {
+		l.log.WithFields(fieldsMap).Error(line)
+	}
+}
+
 // Fatal defines the fatal level for this logger
 func (l *LogrusLogger) Fatal(msg string, fields ...Field) {
 	fields = append(fields, source()...)
 	l.log.WithFields(mapify(fields...)).Fatal(msg)
+}
+
+// FatalL defines the fatal level for more than one log line
+func (l *LogrusLogger) FatalL(msgs []string, fields ...Field) {
+	fieldsMap := mapify(fields...)
+	for _, line := range msgs {
+		l.log.WithFields(fieldsMap).Fatal(line)
+	}
 }
 
 func (l *LogrusLogger) toOutputFormat(name string) logrus.Formatter {
@@ -166,6 +198,8 @@ func (l *LogrusLogger) toLogLevel(name string) logrus.Level {
 
 // ------------------------------------------------------------------
 
+// mapify converts the slice of Fields into a map keyed on Field.Name
+// which can be passed to logrus' WithFields method
 func mapify(fields ...Field) map[string]interface{} {
 	data := map[string]interface{}{}
 	for _, f := range fields {
